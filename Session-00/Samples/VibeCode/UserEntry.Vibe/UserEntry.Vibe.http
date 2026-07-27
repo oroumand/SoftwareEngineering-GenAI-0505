@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:5061
+
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "firstName": "Sara",
+  "lastName": "Ahmadi",
+  "email": "sara@example.com",
+  "phoneNumber": "+989121234567",
+  "dateOfBirth": "1998-05-10",
+  "country": "IR"
+}
+
+###
+
+GET {{baseUrl}}/users
+

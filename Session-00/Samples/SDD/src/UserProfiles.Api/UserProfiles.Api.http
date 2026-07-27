@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:5071
+
+### Health
+GET {{baseUrl}}/health
+
+### Valid profile -> 201
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "  Sara ",
+  "lastName": "Ahmadi  ",
+  "email": "SARA@example.com",
+  "phoneNumber": "+989121234567",
+  "dateOfBirth": "1998-05-10",
+  "country": "ir"
+}
+
+### Duplicate email with different case -> 409
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Sara",
+  "lastName": "Duplicate",
+  "email": "sara@EXAMPLE.com",
+  "phoneNumber": "+989351234567",
+  "dateOfBirth": "1999-06-12",
+  "country": "IR"
+}
+
+### Invalid phone and underage -> 400
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "firstName": "Ali",
+  "lastName": "Young",
+  "email": "ali@example.com",
+  "phoneNumber": "09120000000",
+  "dateOfBirth": "2020-01-01",
+  "country": "Iran"
+}
+
+### List -> 200
+GET {{baseUrl}}/api/users
+

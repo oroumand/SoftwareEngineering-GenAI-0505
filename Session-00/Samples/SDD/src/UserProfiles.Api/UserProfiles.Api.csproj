@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UserProfiles.Application\UserProfiles.Application.csproj" />
+    <ProjectReference Include="..\UserProfiles.Infrastructure\UserProfiles.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
+
