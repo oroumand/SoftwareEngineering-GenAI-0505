@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BlogSpecLab.Api/BlogSpecLab.Api.csproj" />
+    <Project Path="src/BlogSpecLab.Application/BlogSpecLab.Application.csproj" />
+    <Project Path="src/BlogSpecLab.Domain/BlogSpecLab.Domain.csproj" />
+    <Project Path="src/BlogSpecLab.Infrastructure/BlogSpecLab.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BlogSpecLab.Api.IntegrationTests/BlogSpecLab.Api.IntegrationTests.csproj" />
+    <Project Path="tests/BlogSpecLab.Application.Tests/BlogSpecLab.Application.Tests.csproj" />
+    <Project Path="tests/BlogSpecLab.Architecture.Tests/BlogSpecLab.Architecture.Tests.csproj" />
+    <Project Path="tests/BlogSpecLab.Domain.Tests/BlogSpecLab.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

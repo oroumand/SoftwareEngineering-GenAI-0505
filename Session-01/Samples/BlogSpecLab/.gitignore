@@ -1,0 +1,14 @@
+bin/
+obj/
+*.user
+*.suo
+packages/
+.vs/
+.vscode/
+TestResults/
+coverage/
+*.tmp
+*.swp
+.env
+.env.*
+!*.env.example

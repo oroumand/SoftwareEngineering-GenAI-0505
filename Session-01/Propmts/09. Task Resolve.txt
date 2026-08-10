@@ -1,0 +1,23 @@
+فقط فایل `specs/001-write-publish-post/tasks.md` را اصلاح کن.
+
+هیچ فایل دیگری را تغییر نده؛ هیچ کد، Solution، پروژه، Package، Migration یا Test ایجاد نکن.
+
+دو اصلاح لازم است:
+
+1. ترتیب TDD را بدون تغییر در دامنهٔ قابلیت اصلاح کن:
+   - آزمون Invariantهای Domain باید پیش از پیاده‌سازی رفتارهای Aggregate اجرا و ابتدا قرمز مشاهده شود.
+   - آزمون Concurrency انتشار با دو درخواست دارای ETag یکسان باید پیش از پیاده‌سازی Use Case، Endpoint و Persistence رفتار Publish اجرا و ابتدا قرمز مشاهده شود.
+   - آزمون Concurrency ویرایش با دو درخواست دارای ETag یکسان باید پیش از پیاده‌سازی Use Case، Endpoint و Persistence رفتار Edit اجرا و ابتدا قرمز مشاهده شود.
+   - بخش «وابستگی‌ها و ترتیب اجرا» و «فرصت‌های اجرای موازی» را نیز با این ترتیب سازگار کن.
+   - اگر برای کامپایل آزمون Domain به اسکلت حداقلی نوع‌ها نیاز است، آن را صریحاً از پیاده‌سازی رفتارهای Domain جدا کن؛ منطق کسب‌وکار باید پس از آزمون قرمز پیاده‌سازی شود.
+
+2. معیار پایان T003 را دقیق کن:
+   - `BlogSpecLab.Domain.Tests` فقط به Domain نیاز دارد.
+   - `BlogSpecLab.Application.Tests` به Application و وابستگی انتقالی Domain نیاز دارد.
+   - `BlogSpecLab.Api.IntegrationTests` به API و ابزارهای آزمون Integration نیاز دارد.
+   - `BlogSpecLab.Architecture.Tests` مجاز و لازم است اسمبلی‌های Domain، Application، Infrastructure و API را برای کنترل جهت وابستگی بررسی کند.
+   - هیچ پروژهٔ Production نباید به پروژهٔ آزمون وابسته شود.
+
+شناسه‌های T001 تا T046 را پیوسته نگه دار و پوشش FR-018، ETag، If-Match، 428، 412، 409، عدم افشای Draft و آزمون PostgreSQL را کاهش نده.
+
+در پایان فقط `tasks.md` و خلاصهٔ اصلاح‌ها را گزارش کن.

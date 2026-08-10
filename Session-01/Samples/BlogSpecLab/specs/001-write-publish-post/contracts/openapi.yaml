@@ -1,0 +1,277 @@
+openapi: 3.1.0
+info:
+  title: قرارداد API نگارش و انتشار پست وبلاگ
+  version: 1.0.0
+  description: >-
+    قرارداد فنی قابلیت ایجاد، ویرایش، انتشار و خواندن پست. احراز هویت و مدیریت حساب
+    خارج از این قابلیت است؛ عملیات نویسنده هویت معتبر موجود را مصرف می‌کنند.
+paths:
+  /api/posts:
+    post:
+      operationId: createDraft
+      summary: ایجاد پیش‌نویس توسط نویسندهٔ احرازشده
+      x-authenticated-author-required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WritePostRequest'
+      responses:
+        '201':
+          description: پیش‌نویس ایجاد شد.
+          headers:
+            ETag:
+              required: true
+              description: >-
+                نسخهٔ opaque اولیهٔ Draft. این مقدار جزئیات ماندگاری را افشا نمی‌کند و
+                باید بدون تغییر در If-Match عملیات بعدی ارسال شود.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftCreatedResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+    get:
+      operationId: listPublishedPosts
+      summary: دریافت همهٔ پست‌های منتشرشده از جدیدترین به قدیمی‌ترین
+      responses:
+        '200':
+          description: فهرست پست‌های منتشرشده؛ Draft در این پاسخ وجود ندارد.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublishedPostSummary'
+  /api/posts/{postId}:
+    parameters:
+      - $ref: '#/components/parameters/PostId'
+    get:
+      operationId: getPublishedPost
+      summary: خواندن یک پست منتشرشده
+      responses:
+        '200':
+          description: پست منتشرشده یافت شد.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishedPostDetail'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+    put:
+      operationId: editDraft
+      summary: ویرایش پیش‌نویس توسط مالک
+      x-authenticated-author-required: true
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WritePostRequest'
+      responses:
+        '204':
+          description: پیش‌نویس ویرایش شد و همچنان Draft است.
+          headers:
+            ETag:
+              required: true
+              description: نسخهٔ opaque جدید Draft پس از ویرایش موفق
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+        '409':
+          $ref: '#/components/responses/PostStateConflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+  /api/posts/{postId}/publish:
+    parameters:
+      - $ref: '#/components/parameters/PostId'
+    post:
+      operationId: publishDraft
+      summary: انتشار پیش‌نویس توسط مالک
+      x-authenticated-author-required: true
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: پست منتشر و زمان انتشار ثبت شد.
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/PostNotFound'
+        '409':
+          $ref: '#/components/responses/PostStateConflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+components:
+  parameters:
+    PostId:
+      name: postId
+      in: path
+      required: true
+      description: شناسهٔ یکتای پست
+      schema:
+        type: string
+        format: uuid
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: >-
+        ETag opaque دریافت‌شده از پاسخ ایجاد یا ویرایش موفق که باید برای Precondition
+        عملیات استفاده شود.
+      schema:
+        type: string
+  schemas:
+    WritePostRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          description: عنوان غیرخالی و نه فقط شامل فاصله
+        content:
+          type: string
+          description: متن غیرخالی و نه فقط شامل فاصله
+    DraftCreatedResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          const: Draft
+    PublishedPostSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - publishedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+    PublishedPostDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - content
+        - publishedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+    ProblemDetails:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          description: شناسهٔ پایدار نوع خطا
+        title:
+          type: string
+          description: عنوان کنترل‌شده و بدون جزئیات داخلی
+        status:
+          type: integer
+          format: int32
+        traceId:
+          type: string
+          description: شناسهٔ رهگیری بدون دادهٔ حساس
+    ValidationProblemDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+  responses:
+    ValidationError:
+      description: عنوان یا متن نامعتبر است؛ هیچ تغییری اعمال نشده است.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ValidationProblemDetails'
+    AuthenticationRequired:
+      description: هویت معتبر نویسنده در دسترس نیست.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    PostNotFound:
+      description: >-
+        پست وجود ندارد یا برای عامل قابل مشاهده نیست. پاسخ نباید وجود یا محتوای Draft را
+        افشا کند.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    PreconditionRequired:
+      description: >-
+        برای Draft قابل‌دسترس، Header اجباری If-Match ارسال نشده است. این پاسخ نباید برای
+        منبع غیرقابل مشاهده یا Draft غیرمالک به‌کار رود.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    PreconditionFailed:
+      description: >-
+        ETag با نسخهٔ فعلی منطبق نیست یا Commit دیگری پس از بررسی شرط موفق شده است؛ هیچ
+        تغییری اعمال نشده و پاسخ نباید نسخهٔ فعلی یا محتوای Draft را افشا کند.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    PostStateConflict:
+      description: >-
+        وضعیت Domain پست عملیات را مجاز نمی‌کند؛ برای نمونه Post منتشرشده قابل ویرایش یا
+        انتشار دوباره نیست. دادهٔ موجود بدون بازنویسی حفظ شده است.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

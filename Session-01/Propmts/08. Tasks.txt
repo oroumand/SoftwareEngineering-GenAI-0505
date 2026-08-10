@@ -1,0 +1,27 @@
+$speckit-tasks
+
+برای قابلیت فعال `001-write-publish-post`، بر اساس این منابع یک tasks.md اجرایی تولید کن:
+
+- specs/001-write-publish-post/spec.md
+- specs/001-write-publish-post/plan.md
+- specs/001-write-publish-post/research.md
+- specs/001-write-publish-post/data-model.md
+- specs/001-write-publish-post/contracts/openapi.yaml
+- specs/001-write-publish-post/quickstart.md
+- .specify/memory/constitution.md
+
+قواعد:
+
+- فقط `specs/001-write-publish-post/tasks.md` را ایجاد کن.
+- هیچ‌یک از مصنوعات Plan، Specification یا Constitution را تغییر نده.
+- هیچ کد، Solution، پروژه، Package، Migration یا Test ایجاد نکن.
+- همهٔ متن‌های انسانی فارسی باشند.
+- Taskها را به‌شکل قابل‌اجرا و به‌ترتیب وابستگی بنویس؛ هر Task باید شناسه، مسیر دقیق فایل یا فایل‌های هدف، و معیار پایان روشن داشته باشد.
+- ساختار Aggregate-first و چهار لایهٔ Domain، Application، Infrastructure و API را رعایت کن.
+- Taskهای آزمون Domain، Application، Architecture و API Integration را در جای درست جریان کار قرار بده.
+- برای FR-018 صریحاً Taskهای ETag opaque، If-Match، version_token، xmin، پاسخ‌های 428/412/409 و آزمون هم‌زمانی PostgreSQL را پوشش بده.
+- برای عدم افشای Draft، آزمون و Taskهای مشخص داشته باش.
+- Taskها را بر اساس داستان‌های کاربر گروه‌بندی کن و نشان بده کدام بخش‌ها مستقل قابل پیاده‌سازی و آزمون‌اند.
+- یک بخش نهایی برای یکپارچه‌سازی، اجرای کامل Quickstart و کنترل Constitution اضافه کن.
+
+در پایان، فقط tasks.md و خلاصهٔ پوشش نیازمندی‌ها را گزارش کن.
