@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["completed", "needs_input"]
+    },
+    "summary": { "type": "string" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": ["writing", "ambiguity", "internal_inconsistency", "unsupported_claim"]
+          },
+          "field": { "type": "string", "enum": ["title", "body"] },
+          "evidence": { "type": "string" },
+          "explanation": { "type": "string" },
+          "suggestion": { "type": ["string", "null"] }
+        },
+        "required": ["category", "field", "evidence", "explanation", "suggestion"]
+      }
+    },
+    "missingInformation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string", "enum": ["title", "body"] },
+          "evidence": { "type": "string" },
+          "reason": { "type": "string" },
+          "requestedInformation": { "type": "string" }
+        },
+        "required": ["field", "evidence", "reason", "requestedInformation"]
+      }
+    }
+  },
+  "required": ["status", "summary", "issues", "missingInformation"]
+}

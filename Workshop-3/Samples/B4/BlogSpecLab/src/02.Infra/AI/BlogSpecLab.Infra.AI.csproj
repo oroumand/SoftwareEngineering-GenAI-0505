@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenAI" Version="2.14.0" />
+    <ProjectReference Include="../../01.Core/Application/BlogSpecLab.Core.Application.csproj" />
+    <EmbeddedResource Include="../../../specs/002-ai-content-review/contracts/model-output.schema.json" LogicalName="content_review_v1.schema.json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,7 @@
+[agents.developer]
+description = "اجرای CLI کارگاه برای تولید اسکلت آموزشی و گزارش نتیجه."
+config_file = "roles/developer.toml"
+
+[agents.reviewer]
+description = "بازبینی مستقل فایل‌های تولیدشده بدون تغییر آن‌ها."
+config_file = "roles/reviewer.toml"

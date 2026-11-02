@@ -1,0 +1,64 @@
+schema_version: "1.0"
+
+workflow:
+  id: workshop-scaffold
+  name: "دموی گردش‌کار تولید و بازبینی اسکلت"
+  version: "1.0.0"
+  description: "تأیید شروع، توسعه‌دهنده، بررسی خروجی، بازبین و پذیرش انسانی"
+
+inputs:
+  start_verdict:
+    type: string
+    default: ""
+  final_verdict:
+    type: string
+    default: ""
+
+steps:
+  - id: approve-start
+    type: gate
+    message: "اجرای دموی آموزشی با دو عامل آغاز شود؟"
+    options: [approve, reject]
+    on_reject: abort
+    verdict_input: start_verdict
+
+  - id: develop
+    type: prompt
+    integration: codex
+    timeout: 600
+    prompt: |
+      نقش هماهنگ‌کننده را داشته باش. یک زیرعامل واقعی از نوع developer ایجاد کن.
+      مأموریت او: با مهارت و CLI موجود در tools/cli-workshop، اسکلت آموزشی
+      CreatePost را در samples/workflow-{{ context.run_id }} بسازد.
+      این مسیر نسبت به ریشه آزمایشگاه است.
+      منتظر گزارش او بمان و فرمان‌ها، کد خروج و دو مسیر خروجی را نشان بده.
+      خودت فایل تولید نکن و نقش زیرعامل را شبیه‌سازی نکن.
+      در هر شکست توقف کن؛ تولید دستی جایگزین و تغییر مسیر برای عبور از خطا ممنوع است.
+      آزمون‌ها را اجرا نکن و کد محصول یا اسناد Spec Kit را تغییر نده.
+
+  - id: check-files
+    type: shell
+    run: >-
+      powershell -NoProfile -NonInteractive -Command "$ErrorActionPreference='Stop'; $target='tools/cli-workshop/samples/workflow-{{ context.run_id }}'; if (-not (Test-Path -LiteralPath $target -PathType Container)) { throw 'Missing output directory.' }; $entries=@(Get-ChildItem -LiteralPath $target -Force); if ($entries.Count -ne 2) { throw 'Expected exactly two output files.' }; foreach ($fileName in @('CreatePostCommand.cs','CreatePostHandler.cs')) { $filePath=Join-Path $target $fileName; if (-not (Test-Path -LiteralPath $filePath -PathType Leaf)) { throw 'Missing expected output file.' }; if ((Get-Item -LiteralPath $filePath).Length -eq 0) { throw 'Empty output file.' } }; Write-Output 'OUTPUT_CHECK_PASS'"
+
+  - id: review
+    type: prompt
+    integration: codex
+    timeout: 600
+    prompt: |
+      نقش هماهنگ‌کننده را داشته باش. یک زیرعامل واقعی از نوع reviewer ایجاد کن.
+      مأموریت او: دو فایل داخل مسیر زیر را مستقل و مطابق قالب فعلی CLI بررسی کند:
+      tools/cli-workshop/samples/workflow-{{ context.run_id }}
+      وجود و غیرخالی بودن دو فایل در مرحله قبل بررسی شده است؛ محتوای آن‌ها را مستقل بخواند.
+      منتظر نتیجه بمان و گزارش کامل بازبین را برای تصمیم انسانی نشان بده.
+      خودت بازبینی را جایگزین زیرعامل نکن. هیچ فایلی تغییر نکند.
+      فرمان تولید، Build و آزمون اجرا نکن.
+      اگر زیرعامل اجرا نشد یا ایرادی پیدا شد، صریح گزارش بده و چیزی را اصلاح نکن.
+
+  - id: accept-result
+    type: gate
+    message: "پس از خواندن گزارش بازبین، نتیجه را می‌پذیری؟ در صورت ایراد یا اجرا نشدن عامل، reject را انتخاب کن."
+    show_file: "tools/cli-workshop/samples/workflow-{{ context.run_id }}/CreatePostHandler.cs"
+    options: [approve, reject]
+    on_reject: abort
+    verdict_input: final_verdict
