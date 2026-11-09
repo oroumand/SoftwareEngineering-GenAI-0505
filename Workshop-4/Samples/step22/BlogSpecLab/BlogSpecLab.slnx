@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/01.Core/" />
+  <Folder Name="/src/01.Core/Application/">
+    <Project Path="src/01.Core/Application/BlogSpecLab.Core.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/01.Core/Domain/">
+    <Project Path="src/01.Core/Domain/BlogSpecLab.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/02.Infra/" />
+  <Folder Name="/src/02.Infra/AI/">
+    <Project Path="src/02.Infra/AI/BlogSpecLab.Infra.AI.csproj" />
+  </Folder>
+  <Folder Name="/src/02.Infra/DataAccess/">
+    <Project Path="src/02.Infra/DataAccess/BlogSpecLab.Infra.DataAccess.csproj" />
+  </Folder>
+  <Folder Name="/src/03.Endpoints/" />
+  <Folder Name="/src/03.Endpoints/Api/">
+    <Project Path="src/03.Endpoints/Api/BlogSpecLab.Endpoints.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BlogSpecLab.Tests/BlogSpecLab.Tests.csproj" />
+  </Folder>
+</Solution>
