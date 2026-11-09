@@ -68,4 +68,19 @@ public class ToolContentReviewApiTests
                 TestContext.Current.CancellationToken)).StatusCode);
         Assert.Equal(0, fake.Calls);
     }
+
+    [Fact]
+    public async Task Tool_route_is_documented_without_write_headers()
+    {
+        await using var factory = new ContentReviewApiFactory();
+        using var client = factory.CreateClient(new() { BaseAddress = new("https://localhost") });
+        using var doc = System.Text.Json.JsonDocument.Parse(await client.GetStringAsync(
+            "/openapi/v1.json", TestContext.Current.CancellationToken));
+        var route = doc.RootElement.GetProperty("paths")
+            .GetProperty("/api/author/posts/{id}/content-review-tools").GetProperty("post");
+        Assert.DoesNotContain("If-Match", route.GetRawText());
+        Assert.DoesNotContain("ETag", route.GetProperty("responses").GetRawText());
+        foreach (var status in new[] { "200", "400", "401", "403", "404", "409", "422", "502", "503", "504", "500" })
+            Assert.True(route.GetProperty("responses").TryGetProperty(status, out _));
+    }
 }

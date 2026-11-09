@@ -28,7 +28,9 @@ public sealed class OpenApiContractTests
             ["/api/posts"] = ["get"],
             ["/api/posts/{id}"] = ["get"]
         };
-        Assert.Equal(expected.Keys.Order(), paths.EnumerateObject().Select(p => p.Name).Order());
+        // سایر Featureها می‌توانند Endpoint مستقل داشته باشند؛ قرارداد قابلیت اول باید پابرجا بماند.
+        foreach (var path in expected.Keys)
+            Assert.True(paths.TryGetProperty(path, out _), $"مسیر مورد انتظار وجود ندارد: {path}");
         Assert.Equal("bearer", root.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer").GetProperty("scheme").GetString());
         foreach (var (path, methods) in expected)
         {
