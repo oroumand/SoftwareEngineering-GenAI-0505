@@ -1,0 +1,9 @@
+{
+  "version": "needs_input_cases_v1",
+  "promptVersion": "content_review_prompt_v1",
+  "requiresNewEvaluation": true,
+  "cases": [
+    {"title":"ادعای بی‌منبع","body":"طبق گزارش، این روش بهترین نتیجه را دارد","expectedStatus":"needs_input","expectedEvidence":"طبق گزارش","requestedInformation":"منبع گزارش و معیار مقایسه","mustNotInvent":"منبع یا حکم قطعی دربارهٔ صحت ادعا"},
+    {"title":"متن مختلط","body":"این روش حتما بهترین است؛ طبق گزارش نتیجه بهتر شد.","expectedStatus":"needs_input","expectedEvidence":"طبق گزارش","knownWritingEvidence":"حتما","requestedInformation":"منبع و معیار مقایسه","mustNotInvent":"منبع، عدد یا نتیجهٔ پژوهش"}
+  ]
+}
