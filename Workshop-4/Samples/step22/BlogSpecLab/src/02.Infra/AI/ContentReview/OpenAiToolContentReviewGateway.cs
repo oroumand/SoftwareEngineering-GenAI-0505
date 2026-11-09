@@ -66,7 +66,7 @@ public sealed class OpenAiToolContentReviewGateway : IToolContentReviewGateway
             var calls = first.Value.OutputItems.OfType<FunctionCallResponseItem>().ToArray();
             if (calls.Length != 1 || calls[0].FunctionName != ReadCurrentPostTool.Name ||
                 string.IsNullOrWhiteSpace(calls[0].CallId) ||
-                !ReadCurrentPostTool.TryExecute(calls[0].FunctionArguments, input, out var toolResult))
+                !ReadCurrentPostTool.TryExecute(calls[0].FunctionArguments.ToString(), input, out var toolResult))
                 return new(ContentReviewOutcome.InvalidOutput);
 
             // store=false: تاریخچهٔ کامل Tool Call و Tool Result در تماس دوم فرستاده می‌شود.
