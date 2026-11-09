@@ -1,0 +1,243 @@
+`$speckit-implement`
+
+پیاده‌سازی Feature فعال `001-blog-post-management` را از وضعیت فعلی ادامه بده.
+
+در این اجرا فقط **فاز ۵ — User Story 3: جلوگیری از انتشار غیرمجاز، مشاهدهٔ عمومی امن و سخت‌کردن رفتارهای انتشار** را اجرا کن.
+
+فقط وظایف زیر مجاز به اجرا هستند:
+
+- T028
+- T029
+- T030
+- T031
+- T032
+- T033
+- T034
+- T035
+
+هیچ Task دیگری را آغاز نکن.
+
+## هدف این فاز
+
+در پایان این اجرا باید ثابت شود سیستم فقط در Happy Path درست کار نمی‌کند، بلکه در شرایط امنیتی، رقابت هم‌زمان، stale state، تکرار درخواست و دسترسی عمومی نیز رفتار مصوب را حفظ می‌کند.
+
+قابلیت‌های اصلی این فاز:
+
+- Public Read فقط برای پست‌های Published
+- جلوگیری از افشای پست‌های منتشرنشده
+- جلوگیری از دور زدن Permission و Approval
+- جلوگیری از خودتأییدی
+- ثبات پست Published
+- برخورد صحیح با Credential و Permission لغوشده
+- کنترل درخواست‌های هم‌زمان
+- جلوگیری از انتشار بر مبنای Version قدیمی
+- رفتار Idempotent محدود برای Publish تکراری
+- اتمی بودن Review/Publication در شرایط رقابت
+
+## ترتیب اجرا
+
+ابتدا آزمون‌های T028 تا T031 را ایجاد و اجرا کن.
+
+پس از مشاهدهٔ شکست‌های رفتاری مورد انتظار، T032 تا T035 را پیاده‌سازی کن.
+
+آزمون‌ها باید پیش از تکمیل رفتار مربوط نوشته شوند.
+
+## T028 — Public API
+
+دو مسیر عمومی زیر را مطابق قرارداد ایجاد و آزمون کن:
+
+- GET `/api/posts`
+- GET `/api/posts/{id}`
+
+قواعد:
+
+- فقط پست‌های `Published` و حذف‌نشده قابل مشاهده باشند.
+- پاسخ عمومی فقط شامل فیلدهای تعریف‌شده در `PublicPostView` باشد.
+- اطلاعات مالک، Permission، Review، Version، دلیل برگشت یا سایر اطلاعات مدیریتی افشا نشوند.
+- پست ناموجود، حذف‌شده و منتشرنشده از دید Public رفتار 404 یکسان داشته باشند.
+- امکان تشخیص وجود یک پست خصوصی از طریق تفاوت پاسخ فراهم نشود.
+
+## T029 — ماتریس امنیت
+
+سناریوهای امنیتی تعریف‌شده در `tasks.md` و `spec.md` را پوشش بده.
+
+حداقل موارد زیر بررسی شوند:
+
+- Credential غایب
+- Credential جعلی
+- Credential منقضی
+- Credential لغوشده
+- حساب غیرفعال
+- Credential معتبر ولی Permission لغوشده
+- جعل Role، OwnerId یا وضعیت از طریق Header یا Body
+- Publish مستقیم وضعیت‌های غیر Approved
+- استفاده از Approval نامعتبر یا مربوط به محتوای قدیمی
+- Self-approval
+- ویرایش یا حذف Published توسط:
+  - Owner
+  - Editor
+  - کاربر دارای هر دو نقش
+
+در تمام موارد نامعتبر بررسی کن که:
+
+- عملیات رد شود.
+- State تغییر نکند.
+- دادهٔ حساس افشا نشود.
+- HTTP status و `ProblemDetails.code` مطابق قرارداد باشد.
+
+## T030 — Concurrency
+
+آزمون‌های Provider-level واقعی را با SQLite فایل‌محور و دو DbContext / Connection مستقل اجرا کن.
+
+سناریوهای حداقل:
+
+- Edit در رقابت با Approve
+- Edit در رقابت با Publish
+- Delete در رقابت با Publish
+- دو Review Decision هم‌زمان
+
+هر دو ترتیب اجرای ممکن را تا حدی که در Task مشخص شده به‌صورت deterministic بررسی کن.
+
+از `sleep` برای هماهنگی آزمون استفاده نکن.
+
+Retry تجاری انجام نده.
+
+باید ثابت شود:
+
+- فقط Transition سازگار با State و Version فعلی موفق می‌شود.
+- ReviewDecision یتیم ایجاد نمی‌شود.
+- Publication ناقص یا یتیم ایجاد نمی‌شود.
+- Approval نامعتبر روی محتوای تغییرکرده باقی نمی‌ماند.
+- شکست Concurrency اثر جزئی ذخیره نمی‌کند.
+
+## T031 — Atomicity، Publish تکراری و Permission Revocation
+
+سناریوهای زیر را مطابق Tasks اجرا کن:
+
+- دو Publish هم‌زمان
+- Publish با Version قدیمی
+- Revoke Permission در رقابت با عملیات حساس
+- خطای پایدار Storage
+- شکست Commit
+
+Publish تکراری باید مطابق قرارداد رفتار کند:
+
+اگر:
+
+- هویت معتبر است،
+- Permission فعلی Publish برقرار است،
+- `If-Match` از نظر قالب معتبر است،
+- Post قبلاً Published شده و Publication معتبر دارد،
+
+پاسخ باید همان Publication نخست را برگرداند و Commit تازه‌ای ایجاد نکند؛ حتی اگر Version ارائه‌شده قدیمی باشد.
+
+این استثنا فقط برای Publish تعریف شده و نباید به سایر Commandها تعمیم داده شود.
+
+## T032 و T033 — Public Read
+
+`PublicPostService`، Reader مربوط به Persistence و DTO عمومی را مطابق Plan ایجاد کن.
+
+Public API نباید برای نمایش داده به Domain یا DataAccess shortcut بزند؛ مسیر Application حفظ شود.
+
+## T034 — رفتار Conflict و Publish Idempotency
+
+رفتارهای Conflict را مطابق قرارداد کامل کن.
+
+تفکیک زیر باید حفظ شود:
+
+- `412 stale_version` برای اجرای Command روی Version قدیمی
+- `409` برای State ناسازگار
+- `503 storage_unavailable` برای خطای نهایی Storage
+- Publish تکراری معتبر → `200` با Publication نخست و بدون Commit جدید
+
+`currentStatus` و `currentVersion` فقط پس از بررسی دسترسی کاربر مجاز قابل بازگشت باشند.
+
+محتوای پست در پاسخ Conflict قرار نگیرد.
+
+## T035 — Hardening و Regression
+
+تمام یافته‌های آزمون‌های T029 تا T031 را در مرز درست رفع کن.
+
+Business Rule باید در Domain یا Application باقی بماند.
+
+از انتقال قواعد به Endpoint یا DataAccess برای سبز کردن تست‌ها خودداری کن.
+
+پس از اصلاح:
+
+- تمام تست‌های US3
+- تمام تست‌های US2
+- تمام تست‌های US1
+- تمام تست‌های Foundation
+
+را اجرا کن.
+
+## مرزهای معماری
+
+همچنان رعایت شود:
+
+- Domain به Infrastructure وابسته نشود.
+- Application به HTTP یا EF Core وابسته نشود.
+- DataAccess مسئول تصمیم کسب‌وکاری جدید نباشد.
+- Endpointها نازک باقی بمانند.
+- Authentication به‌تنهایی Permission ایجاد نکند.
+- Permission جاری هنگام عملیات حساس دوباره بررسی شود.
+- `allowedActions` صرفاً راهنمای Client باقی بماند.
+
+## Scope
+
+در این اجرا:
+
+- T036 یا هیچ Task بعدی را آغاز نکن.
+- OpenAPI نهایی‌سازی نکن مگر چیزی که قبلاً برای Endpointهای موجود ضروری بوده است.
+- quickstart را نهایی نکن.
+- validation.md یا acceptance.md نهایی تولید نکن.
+- پذیرش انسانی را اجرا نکن.
+- AI، MCP، RAG، Qdrant یا Agent اضافه نکن.
+- Feature جدید خارج از Specification ایجاد نکن.
+- تصمیم معماری سراسری جدید بدون گزارش و تأیید ایجاد نکن.
+
+اگر برای تکمیل این فاز نیاز به تغییر `spec.md`، `plan.md` یا `tasks.md` پیدا شد، برای همان موضوع متوقف شو و گزارش بده.
+
+## Validation پایان فاز
+
+در پایان:
+
+1. Restore کامل Solution را اجرا کن.
+2. Build را اجرا کن.
+3. تمام Test Suite را اجرا کن.
+4. Public API را در برابر عدم افشای داده بررسی کن.
+5. ماتریس امنیت را بررسی کن.
+6. Concurrency Testها را به‌صورت deterministic اجرا کن.
+7. Atomicity را در Failureها بررسی کن.
+8. Publish تکراری و Publish با stale Version را بررسی کن.
+9. Permission Revocation را در زمان عملیات بررسی کن.
+10. بررسی کن هیچ Secret یا Credential ثابتی وارد Repository یا Log نشده باشد.
+11. Project Referenceها را با Constitution تطبیق بده.
+12. بررسی کن هیچ Package یا قابلیت AI/MCP/RAG/Qdrant وارد پروژه نشده باشد.
+
+## مدیریت tasks.md
+
+فقط T028 تا T035 را در صورتی که واقعاً تکمیل و اعتبارسنجی شده‌اند از `[ ]` به `[X]` تغییر بده.
+
+هیچ Task بعد از T035 را تکمیل‌شده علامت نزن.
+
+## گزارش پایان
+
+در پایان گزارش کن:
+
+1. وضعیت T028 تا T035 به تفکیک.
+2. Public API ایجادشده.
+3. سناریوهای امنیتی آزموده‌شده.
+4. سناریوهای Concurrency آزموده‌شده.
+5. نحوهٔ پیاده‌سازی Atomicity.
+6. رفتار Publish تکراری و stale Version.
+7. رفتار Permission/Credential Revocation.
+8. فایل‌های اصلی ایجاد یا تغییرکرده.
+9. Migration جدید، در صورت وجود، و دلیل آن.
+10. نتیجهٔ Restore و Build.
+11. تعداد Passed / Failed / Skipped کل Test Suite.
+12. Taskهایی که `[X]` شده‌اند.
+13. مشکلات یا بدهی‌های باقی‌مانده.
+14. تأیید کن T036 و Taskهای بعدی اجرا نشده‌اند.
+
+بعد از گزارش متوقف شو و منتظر دستور بعدی بمان.

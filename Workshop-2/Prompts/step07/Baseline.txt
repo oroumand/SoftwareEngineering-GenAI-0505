@@ -1,0 +1,146 @@
+براساس تصمیم‌های تأییدشدهٔ معماری پروژه و خروجی Plan قابلیت فعال، یک سند سراسری برای Technical Baseline پروژه ایجاد کن.
+
+این مرحله مربوط به تثبیت تصمیم‌های فنی سراسری Repository است و نباید Feature جدید، Task یا Implementation ایجاد کند.
+
+## فایل جدید
+
+فایل زیر را ایجاد کن:
+
+`docs/architecture/technical-baseline.md`
+
+تمام توضیحات سند باید فارسی باشند. نام فناوری‌ها، فایل‌ها، پروژه‌ها، کلاس‌ها و اصطلاحات فنی ضروری می‌توانند انگلیسی باقی بمانند.
+
+## هدف سند
+
+این سند باید فقط تصمیم‌های فنی‌ای را ثبت کند که برای کل BlogSpecLab معتبر هستند یا از این مرحله به بعد به‌عنوان پیش‌فرض معماری پروژه پذیرفته می‌شوند.
+
+این سند نباید تصمیم‌های موقت، آزمایشی یا مخصوص یک Feature را به تصمیم سراسری تبدیل کند.
+
+در صورت تعارض، Constitution مرجع بالادستی است.
+
+## منابع
+
+پیش از تولید سند این فایل‌ها را بررسی کن:
+
+- `.specify/memory/constitution.md`
+- `AGENTS.md`
+- `specs/001-blog-post-management/plan.md`
+- `specs/001-blog-post-management/research.md`
+
+از اطلاعات این فایل‌ها استفاده کن، اما محتوای آن‌ها را کپی نکن.
+
+## تصمیم‌های سراسری تأییدشده
+
+موارد زیر باید در Technical Baseline ثبت شوند:
+
+### Platform
+
+- زبان اصلی پروژه C# است.
+- نسخهٔ هدف .NET 10 است.
+- Framework اصلی ASP.NET Core است.
+
+### Architecture
+
+- ساختار پروژه‌ها و جهت وابستگی‌ها مطابق Constitution است.
+- Domain باید مستقل از Infrastructure باقی بماند.
+- Application مسئول Orchestration موارد کاربرد و کنترل Permissionهای مربوط به Use Case است.
+- Infrastructure مسئول پیاده‌سازی وابستگی‌های بیرونی است.
+- Endpoints نباید Business Logic را در خود نگهداری کنند.
+
+### Persistence
+
+- برای Persistence رابطه‌ای پروژه از Entity Framework Core استفاده می‌شود.
+- Provider دیتابیس سراسری پروژه هنوز تثبیت نشده است.
+- SQLite فقط انتخاب فعلی برای اجرای محلی و آموزشی Feature اول است و نباید به‌عنوان Database Baseline کل پروژه ثبت شود.
+- جزئیات ORM و DbContext نباید به Domain نشت کنند.
+
+### Security
+
+- Authentication و Authorization دو مسئولیت مستقل هستند.
+- شناسایی هویت کاربر به‌تنهایی مجوز عملیات ایجاد نمی‌کند.
+- Permission جاری باید هنگام عملیات حساس از منبع معتبر سمت سرور بررسی شود.
+- ادعاهای Client، Token یا ورودی HTTP نباید به‌تنهایی Source of Truth برای Permission باشند.
+
+### HTTP Error Contract
+
+- خطاهای HTTP باید با `ProblemDetails` نمایش داده شوند.
+- خطاهای قابل پردازش Client باید دارای `code` پایدار باشند.
+- جزئیات داخلی، StackTrace، Credential و اطلاعات حساس نباید در پاسخ خطا افشا شوند.
+
+### Testing
+
+- Framework اصلی آزمون پروژه xUnit است.
+- برای Integration Testهای ASP.NET Core از `WebApplicationFactory` استفاده می‌شود.
+- قواعد Domain و Application باید بدون وابستگی غیرضروری به سرویس‌های بیرونی قابل آزمون باشند.
+- Integrationهای واقعی باید در سطح مناسب و با Provider واقعی یا نزدیک به محیط واقعی بررسی شوند.
+
+### Concurrency و Atomicity
+
+- Use Caseهایی که اجرای آن‌ها روی وضعیت قدیمی می‌تواند نتیجهٔ کسب‌وکاری نادرست ایجاد کند باید Concurrency Control صریح داشته باشند.
+- مکانیزم دقیق Concurrency می‌تواند متناسب با Aggregate، Persistence Provider و قرارداد بیرونی انتخاب شود.
+- استفاده از Guid Version یا ETag نباید به‌صورت قاعدهٔ اجباری برای تمام موجودیت‌های آینده ثبت شود.
+- تغییرات وابسته‌ای که از نظر کسب‌وکار یک عملیات واحد هستند باید در مرز تراکنشی مناسب به‌صورت اتمی Commit شوند.
+
+## مواردی که نباید Baseline شوند
+
+موارد زیر فقط تصمیم‌های Feature فعلی یا محیط آموزشی هستند و نباید به تصمیم سراسری تبدیل شوند:
+
+- SQLite به‌عنوان دیتابیس اصلی پروژه
+- Minimal API به‌عنوان تنها سبک مجاز API
+- opaque bearer credential به‌عنوان روش دائمی Authentication
+- Guid Version برای تمام Aggregateها
+- ETag/If-Match برای تمام APIهای آینده
+
+در صورت نیاز می‌توان در Technical Baseline توضیح داد که این موارد فعلاً تصمیم سراسری نیستند.
+
+## ساختار پیشنهادی سند
+
+سند را کوتاه و مرجع‌محور نگه دار و تقریباً با این بخش‌ها سازمان‌دهی کن:
+
+1. هدف و دامنه
+2. Platform
+3. Architecture
+4. Persistence
+5. Security
+6. HTTP Contracts
+7. Testing
+8. Concurrency and Transactions
+9. تصمیم‌های هنوز باز
+10. نحوهٔ تغییر Technical Baseline
+
+در بخش «تصمیم‌های هنوز باز» حداقل مشخص کن:
+
+- Database Provider نهایی پروژه هنوز انتخاب نشده است.
+- Authentication Provider نهایی پروژه هنوز انتخاب نشده است.
+- سبک سراسری Endpointها هنوز تثبیت نشده است.
+- Model Provider و Embedding Model در زمان ورود AI/RAG تعیین خواهند شد.
+
+## به‌روزرسانی AGENTS.md
+
+پس از ایجاد `technical-baseline.md`، فایل Root-level `AGENTS.md` را فقط به‌اندازهٔ لازم اصلاح کن.
+
+در بخش منابع مرجع اضافه کن که:
+
+- `docs/architecture/technical-baseline.md` مرجع تصمیم‌های فنی سراسری و تثبیت‌شدهٔ پروژه است.
+- پیش از اجرای Plan، ایجاد Integration جدید یا تصمیم فنی سراسری، Agent باید این سند را بررسی کند.
+- تصمیم‌های ثبت‌شده در Baseline نباید بدون دلیل و تصمیم معماری جدید دوباره انتخاب یا جایگزین شوند.
+
+محتوای Technical Baseline را داخل AGENTS.md کپی نکن؛ فقط به آن ارجاع بده.
+
+## محدودیت این مرحله
+
+- Constitution را تغییر نده.
+- فایل‌های Feature را تغییر نده.
+- هیچ Task ایجاد نکن.
+- هیچ کد C# تولید نکن.
+- هیچ Solution یا پروژه‌ای ایجاد نکن.
+- هیچ Package نصب نکن.
+- وارد Implementation نشو.
+- فقط `docs/architecture/technical-baseline.md` را ایجاد و `AGENTS.md` را به‌اندازهٔ لازم اصلاح کن.
+
+در پایان گزارش کن:
+
+1. چه فایل‌هایی ایجاد یا اصلاح شدند.
+2. چه تصمیم‌هایی وارد Technical Baseline شدند.
+3. چه تصمیم‌هایی عمداً Feature-specific باقی ماندند.
+4. چه تصمیم‌های سراسری هنوز باز هستند.

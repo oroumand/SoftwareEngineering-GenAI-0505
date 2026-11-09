@@ -1,0 +1,162 @@
+`$speckit-implement`
+
+پیاده‌سازی Feature فعال `001-blog-post-management` را از وضعیت فعلی ادامه بده.
+
+در این اجرا فقط **فاز ۴ — User Story 2: بررسی، تأیید و انتشار توسط ویراستار** را اجرا کن.
+
+فقط وظایف زیر مجاز به اجرا هستند:
+
+- T021
+- T022
+- T023
+- T024
+- T025
+- T026
+- T027
+
+هیچ Task دیگری را آغاز نکن.
+
+## هدف این فاز
+
+در پایان این اجرا باید مسیر مستقل ویراستار برای موارد زیر کامل و قابل آزمون باشد:
+
+- مشاهدهٔ صف پست‌های قابل بررسی
+- مشاهدهٔ جزئیات پست قابل بررسی
+- Request Changes با دلیل معتبر
+- Approval توسط Editor غیرمالک
+- Publish با Permission فعلی
+- جلوگیری از خودتأییدی
+- حفظ اعتبار Approval تاریخی پس از لغو Permission تأییدکننده، تا زمانی که محتوا تغییر نکرده باشد
+- امکان انتشار پست توسط مالک دو نقشی در صورتی که Editor دیگری همان محتوا را تأیید کرده باشد
+
+## ترتیب اجرا
+
+ابتدا آزمون‌های T021 تا T023 را ایجاد و اجرا کن.
+
+سپس پیاده‌سازی T024 تا T027 را انجام بده.
+
+آزمون‌ها باید پیش از تکمیل رفتار مربوط نوشته شوند و شکست رفتاری واقعی از خطای صرفاً کامپایل جدا شود.
+
+## Domain
+
+رفتارهای Review و Publish را مطابق `spec.md` و `data-model.md` به Aggregate اضافه کن.
+
+قواعد زیر باید رعایت شوند:
+
+- `RequestChanges` فقط از `PendingReview` مجاز است.
+- دلیل RequestChanges باید غیرخالی و غیر whitespace باشد.
+- `Approve` فقط روی `PendingReview` مجاز است.
+- Reviewer نباید Owner همان Post باشد.
+- ReviewDecision باید immutable باشد.
+- ReviewDecision باید `ContentRevision` و Snapshot همان Title/Body تأییدشده را ثبت کند.
+- Approval فقط برای همان محتوای بررسی‌شده معتبر باشد.
+- تغییر واقعی محتوا باید Approval قبلی را بی‌اعتبار کند.
+- لغو Permission بعدی Reviewer نباید ReviewDecision تاریخی را تغییر دهد.
+- `Publish` فقط روی `Approved` با Approval معتبر محتوای فعلی مجاز باشد.
+- اطلاعات Publication نخست باید پس از ثبت ثابت باقی بماند.
+- تکرار Publish نباید Publication جدید ایجاد کند.
+
+## Application
+
+Use Caseهای زیر را در Application پیاده‌سازی کن:
+
+- List Editor Queue
+- Get Editor Post
+- RequestChanges
+- Approve
+- Publish
+
+قواعد Application:
+
+- `CanReview` و `CanPublish` مستقل و با Permission جاری بررسی شوند.
+- Permission مربوط به هر Use Case هنگام همان درخواست از منبع معتبر سمت سرور خوانده شود.
+- Reviewer تاریخی بعداً دوباره از نظر Permission بررسی نشود.
+- مالکیت پیش از افشای اطلاعات حساس یا نتیجهٔ تعارض بررسی شود.
+- ثبت ReviewDecision و تغییر وضعیت Post در یک Commit اتمی انجام شود.
+- Publish باید از Approval معتبر محتوای فعلی استفاده کند.
+- مالک دو نقشی فقط در صورت Approval معتبر Editor دیگری بتواند Publish کند.
+
+## Persistence
+
+ذخیرهٔ ReviewDecision و Publication را مطابق Plan پیاده‌سازی کن.
+
+باید:
+
+- ReviewDecisionهای تاریخی حفظ شوند.
+- ReviewDecisionها immutable باقی بمانند.
+- تغییر Post و ReviewDecision مربوطه اتمی ثبت شوند.
+- تغییر Permission یا Credential اطلاعات تاریخی Review و Publication را حذف نکند.
+- در صورت نیاز واقعی Schema را با Migration جدید به‌روزرسانی کن.
+- Migration غیرضروری ایجاد نکن.
+
+## API
+
+فقط Endpointهای Editor مربوط به این User Story را ایجاد کن:
+
+- GET `/api/editor/posts`
+- GET `/api/editor/posts/{id}`
+- POST `/api/editor/posts/{id}/request-changes`
+- POST `/api/editor/posts/{id}/approve`
+- POST `/api/editor/posts/{id}/publish`
+
+رفتار HTTP باید مطابق `contracts/http-api.md` باشد.
+
+`allowedActions` برای Editor باید دقیقاً مطابق Vocabulary و ترتیب قرارداد تولید شود.
+
+خودتأییدی نباید هیچ‌گاه `approve` را به‌عنوان Action مجاز نمایش دهد.
+
+وجود `allowedActions` مجوز اجرای عملیات بعدی محسوب نمی‌شود.
+
+## Scope
+
+در این اجرا:
+
+- T028 یا هیچ Task بعدی را آغاز نکن.
+- Public API مربوط به US3 را ایجاد نکن.
+- ماتریس کامل امنیت و Concurrency مربوط به US3 را اجرا نکن.
+- رفتارهای خارج از Specification اضافه نکن.
+- AI، MCP، RAG، Qdrant یا Agent اضافه نکن.
+- تصمیم معماری جدید خارج از Plan و Research اتخاذ نکن.
+
+اگر برای تکمیل این فاز نیاز به تغییر Spec، Plan یا Tasks پیدا شد، همان‌جا متوقف شو و موضوع را گزارش کن.
+
+## Validation پایان فاز
+
+در پایان:
+
+1. Restore و Build کامل Solution را اجرا کن.
+2. آزمون‌های Domain مربوط به Review/Publish را اجرا کن.
+3. آزمون‌های Application مربوط به Editor را اجرا کن.
+4. آزمون‌های Integration مربوط به Editor API را اجرا کن.
+5. همهٔ تست‌های US1 و Foundation را نیز برای Regression اجرا کن.
+6. بررسی کن خودتأییدی در Domain، Application و HTTP قابل دور زدن نباشد.
+7. بررسی کن تغییر محتوا Approval قبلی را بی‌اعتبار کند.
+8. بررسی کن لغو Permission تأییدکننده، Approval تاریخی محتوای بدون تغییر را باطل نکند.
+9. بررسی کن اطلاعات Publication نخست در Publish تکراری تغییر نکند.
+10. بررسی کن Project Referenceها و مرزهای معماری همچنان مطابق Constitution باشند.
+
+## مدیریت tasks.md
+
+فقط T021 تا T027 را در صورتی که واقعاً تکمیل و اعتبارسنجی شده‌اند با `[X]` علامت بزن.
+
+Task ناقص را تکمیل‌شده اعلام نکن.
+
+## گزارش پایان
+
+در پایان گزارش کن:
+
+1. وضعیت T021 تا T027 به تفکیک.
+2. فایل‌های اصلی ایجاد یا تغییرکرده.
+3. State Transitionهای جدید.
+4. ساختار و قواعد ReviewDecision.
+5. نحوهٔ اعتبارسنجی Approval.
+6. نحوهٔ کنترل CanReview و CanPublish.
+7. Endpointهای Editor ایجادشده.
+8. Migration جدید، در صورت وجود، و دلیل آن.
+9. نتیجهٔ Build و Test.
+10. تعداد Passed / Failed / Skipped.
+11. Taskهایی که `[X]` شده‌اند.
+12. مشکلات یا بدهی‌های باقی‌مانده.
+13. تأیید کن T028 یا Taskهای بعدی اجرا نشده‌اند.
+
+بعد از گزارش متوقف شو و منتظر دستور بعدی بمان.

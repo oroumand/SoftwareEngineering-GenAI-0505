@@ -1,0 +1,283 @@
+`$speckit-implement`
+
+پیاده‌سازی Feature فعال `001-blog-post-management` را از وضعیت فعلی ادامه بده.
+
+در این اجرا فقط **فاز ۶ — تکمیل و بررسی سراسری** را انجام بده.
+
+وظایف مرتبط این فاز:
+
+- T036
+- T037
+- T038
+- T039
+- T040
+
+اما دربارهٔ T040 محدودیت ویژه‌ای وجود دارد که در ادامه آمده است.
+
+هیچ Feature جدید یا Task خارج از این فاز را آغاز نکن.
+
+## هدف این فاز
+
+در پایان این مرحله باید بتوانیم با شواهد واقعی نشان دهیم:
+
+- Implementation با Specification سازگار است.
+- قرارداد HTTP با رفتار واقعی برنامه مطابقت دارد.
+- پروژه از صفر قابل Build، Test و Run است.
+- Quickstart براساس اجرای واقعی پروژه نوشته شده است.
+- Success Criteriaهای قابل اثبات خودکار دارای شاهد هستند.
+- مواردی که فقط با پذیرش انسانی قابل اثبات‌اند، صادقانه از آزمون خودکار تفکیک شده‌اند.
+
+---
+
+## T036 — OpenAPI و تطبیق قرارداد
+
+OpenAPI برنامه را با امکانات استاندارد ASP.NET Core تکمیل کن.
+
+Endpointهای Author، Editor و Public را از نظر Metadata و قرارداد بررسی کن.
+
+خروجی واقعی API را با:
+
+`specs/001-blog-post-management/contracts/http-api.md`
+
+تطبیق بده.
+
+موارد زیر باید بررسی شوند:
+
+- مسیرها و HTTP Methodها
+- Request DTOها
+- Response DTOها
+- Bearer Authentication
+- If-Match / ETag
+- status codeها
+- ProblemDetails
+- `code`های پایدار خطا
+- PublicPostView
+- PostView
+- allowedActions
+
+Swagger UI یا Package نمایشی جدید اضافه نکن؛ فقط OpenAPI موردنیاز Plan را ایجاد کن.
+
+اگر Implementation با قرارداد اختلاف دارد، ابتدا مشخص کن کدام‌یک منبع معتبر است.
+
+اگر اختلاف ناشی از Implementation است، کد را اصلاح کن.
+
+اگر اختلاف ناشی از نقص Artifact طراحی است، بدون گزارش وارد تغییر قرارداد نشو.
+
+---
+
+## T037 — واقعی‌کردن quickstart.md
+
+فایل:
+
+`specs/001-blog-post-management/quickstart.md`
+
+را از یک راهنمای طراحی آینده به یک راهنمای واقعی، اجراشده و بررسی‌شده تبدیل کن.
+
+فقط دستورهایی را ثبت کن که واقعاً روی Repository فعلی اجرا و تأیید کرده‌ای.
+
+حداقل شامل:
+
+- بررسی .NET SDK
+- restore
+- tool restore
+- ایجاد یا اعمال Migration
+- build
+- test
+- اجرای API
+- مسیر و پیکربندی SQLite
+- نحوهٔ Provision کاربران آزمایشی
+- نحوهٔ دریافت و نگهداری Credential
+- نحوهٔ Revoke کردن Credential یا Permission
+- نمونهٔ درخواست‌های Author
+- نمونهٔ درخواست‌های Editor
+- نمونهٔ Public Read
+- دریافت ETag
+- استفاده از If-Match
+- نمونهٔ خطاهای اصلی و `ProblemDetails.code`
+- allowedActions
+
+Quickstart باید امکان Demo کردن مسیر اصلی زیر را فراهم کند:
+
+Author:
+Create → Edit → Submit
+
+Editor:
+Request Changes → Submit again → Approve → Publish
+
+Public:
+Read Published Post
+
+و همچنین حداقل چند Failure مهم:
+
+- Unauthorized
+- Self Approval
+- stale Version
+- Published mutation
+- Private Post access
+
+Secret یا Credential واقعی را در فایل ثبت نکن.
+
+---
+
+## T038 — AGENTS.md و Validation
+
+اکنون Solution و پروژه‌های واقعی وجود دارند.
+
+بخش Build/Test فایل Root-level:
+
+`AGENTS.md`
+
+را با دستورات کوتاه و واقعی که در همین Repository اجرا و تأیید شده‌اند به‌روزرسانی کن.
+
+جزئیات Feature را وارد AGENTS.md نکن.
+
+سپس فایل زیر را ایجاد کن:
+
+`specs/001-blog-post-management/validation.md`
+
+در آن شواهد فنی اعتبارسنجی را ثبت کن، شامل:
+
+- نتیجهٔ restore
+- نتیجهٔ build
+- نتیجهٔ test
+- تعداد Passed / Failed / Skipped
+- بررسی Project Referenceها
+- بررسی استقلال Core
+- عدم وجود Business Logic در Endpoint یا DataAccess
+- عدم وجود Secret ثابت
+- عدم وجود وابستگی ناخواسته به AI، MCP، RAG یا Qdrant
+- تطبیق OpenAPI با قرارداد
+- محدودیت‌های محیط SQLite و اجرای محلی
+
+فقط نتایج واقعی را ثبت کن.
+
+---
+
+## T039 — شواهد Success Criteria
+
+در همان:
+
+`specs/001-blog-post-management/validation.md`
+
+برای Success Criteriaهای قابل اثبات خودکار، شواهد روشن ثبت کن.
+
+حداقل:
+
+- SC-001
+- SC-002
+- SC-003
+- SC-006
+
+برای هر مورد مشخص کن:
+
+1. معیار چیست.
+2. کدام Test یا Test Suite آن را پوشش می‌دهد.
+3. نتیجهٔ آزمون چه بوده است.
+4. در صورت ارتباط، رفتار HTTP یا وضعیت DB چه شواهدی ارائه می‌دهد.
+
+Token، Credential یا متن خصوصی را در شواهد ثبت نکن.
+
+صریحاً ذکر کن که سبز بودن Testها جایگزین SC-004 و SC-005 نیست.
+
+---
+
+## T040 — پذیرش انسانی
+
+این Task باید صادقانه مدیریت شود.
+
+T040 شامل دو بخش است:
+
+### بخش اول — آماده‌سازی
+
+فایل زیر را در صورت نبود ایجاد کن:
+
+`specs/001-blog-post-management/acceptance.md`
+
+در آن روش اجرای پذیرش انسانی را آماده کن:
+
+- حداقل ۵ Author
+- حداقل ۵ Editor
+- سناریوی کاری Author
+- سناریوی کاری Editor
+- معیار SC-004
+- معیار SC-005
+- روش ثبت تعداد شرکت‌کنندگان
+- تعداد موفق‌ها
+- خطاهای فهم
+- شرایط اجرا
+- فرمول محاسبهٔ درصد موفقیت
+- آستانهٔ حداقل ۹۰٪
+
+### بخش دوم — اجرای واقعی
+
+اگر در این زمان پذیرش انسانی واقعی با شرکت‌کنندگان انجام نشده است:
+
+- نتیجه جعل نکن.
+- تعداد شرکت‌کننده فرضی ایجاد نکن.
+- درصد موفقیت ساختگی ثبت نکن.
+- T040 را `[X]` نکن.
+- وضعیت را در `acceptance.md` به‌عنوان «آمادهٔ اجرا / هنوز انجام نشده» ثبت کن.
+
+T040 فقط زمانی `[X]` شود که پذیرش واقعی انجام شده و نتایج واقعی ثبت شده باشند.
+
+---
+
+## اجرای نهایی Validation
+
+پس از T036 تا T039:
+
+1. restore را اجرا کن.
+2. build کامل Solution را اجرا کن.
+3. کل Test Suite را اجرا کن.
+4. OpenAPI را بررسی کن.
+5. Quickstart را تا حد ممکن واقعاً از ابتدا اجرا و اعتبارسنجی کن.
+6. Project Referenceها را بررسی کن.
+7. Constitution و Technical Baseline را از نظر انطباق نهایی بررسی کن.
+8. Secret یا Credential ثابت را بررسی کن.
+9. بررسی کن Artifactهای مستنداتی وضعیت واقعی پروژه را نشان دهند.
+
+---
+
+## مدیریت tasks.md
+
+T036 تا T039 فقط در صورت تکمیل و Validation واقعی `[X]` شوند.
+
+T040 فقط در صورت اجرای واقعی پذیرش انسانی `[X]` شود.
+
+اگر فقط سند پذیرش آماده شده ولی پذیرش انجام نشده است، T040 باید `[ ]` باقی بماند.
+
+---
+
+## محدودیت Scope
+
+در این اجرا:
+
+- Feature جدید ایجاد نکن.
+- Behavior کسب‌وکاری جدید اضافه نکن.
+- Spec را بدون کشف تناقض واقعی تغییر نده.
+- AI، MCP، RAG، Qdrant یا Agent اضافه نکن.
+- Database Provider یا Authentication Provider سراسری را تغییر نده.
+- تصمیم معماری جدید خارج از Scope ایجاد نکن.
+- نتیجهٔ آزمون یا پذیرش انسانی را جعل نکن.
+
+---
+
+## گزارش پایان
+
+در پایان گزارش کن:
+
+1. وضعیت T036 تا T040 به تفکیک.
+2. فایل‌های ایجاد یا اصلاح‌شده.
+3. وضعیت OpenAPI و تطبیق با قرارداد.
+4. تغییرات نهایی quickstart.md.
+5. تغییرات AGENTS.md.
+6. خلاصهٔ validation.md.
+7. شواهد SC-001، SC-002، SC-003 و SC-006.
+8. وضعیت واقعی SC-004 و SC-005.
+9. نتیجهٔ restore / build / test.
+10. تعداد Passed / Failed / Skipped.
+11. Taskهای `[X]` و Taskهای باقی‌مانده.
+12. محدودیت‌ها یا بدهی‌های باقی‌مانده.
+13. تأیید کن هیچ Feature بعدی یا قابلیت AI آغاز نشده است.
+
+بعد از گزارش متوقف شو.

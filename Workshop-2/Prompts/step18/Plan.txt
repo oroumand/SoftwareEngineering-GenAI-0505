@@ -1,0 +1,24 @@
+`$speckit-plan`
+
+برای Feature فعال `002-ai-content-review` برنامهٔ فنی را براساس Specification تأییدشده، Constitution، Technical Baseline و سایر اسناد مرجع Repository ایجاد کن.
+
+تصمیم‌های سراسری موجود پروژه را دوباره انتخاب یا بازتعریف نکن.
+
+مجهولات فنی جدیدی که برای این قابلیت هوش مصنوعی لازم هستند را در فرایند استاندارد Plan بررسی و در `research.md` با «تصمیم، دلیل انتخاب و گزینه‌های جایگزین» ثبت کن.
+
+به‌ویژه باید روشن شود:
+
+- قرارداد Structured Output و نحوهٔ اعمال Schema
+- تفکیک نتیجهٔ موفق، `needs_input`، refusal و failure فنی
+- مرز مسئولیت Application و `Infra.AI`
+- Provider، Model و SDK مورد استفاده برای این قابلیت
+- Data Minimization در ارسال محتوای پست به سرویس بیرونی
+- Timeout و Cancellation
+- اعتبارسنجی خروجی مدل
+- نحوهٔ آزمون رفتار deterministic و نحوهٔ ارزیابی کیفیت غیرقطعی مدل
+
+اگر یکی از تصمیم‌های جدید ماهیت سراسری برای BlogSpecLab دارد، آن را در گزارش نهایی به‌عنوان «کاندید Technical Baseline» مشخص کن تا پس از بازبینی انسانی دربارهٔ تثبیت آن تصمیم بگیریم.
+
+در این مرحله فقط Artifactهای استاندارد Plan را تولید کن.
+
+وارد Tasks یا Implementation نشو.

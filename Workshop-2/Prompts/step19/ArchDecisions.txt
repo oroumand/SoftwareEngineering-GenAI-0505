@@ -1,0 +1,287 @@
+طراحی Feature فعال `002-ai-content-review` را براساس بازبینی انسانی تصمیم‌های Plan اصلاح کن و سپس تصمیم‌های سراسری تأییدشده را در Technical Baseline پروژه ثبت کن.
+
+این مرحله فقط مربوط به اصلاح Artifactهای طراحی و دانش سراسری Repository است.
+
+وارد Tasks یا Implementation نشو.
+
+## بخش اول — اصلاح Provider API و Model این Feature
+
+در تمام Artifactهای Feature فعال بررسی کن آیا تصمیم‌های زیر یا معادل آن‌ها ثبت شده‌اند:
+
+- `gpt-4.1-mini-2025-04-14`
+- Chat Completions API
+- `ChatClient`
+- `CompleteChatAsync`
+- `response_format` مربوط به Chat Completions
+
+این تصمیم‌ها برای این Feature باید اصلاح شوند.
+
+### تصمیم جدید
+
+برای Feature `002-ai-content-review` از موارد زیر استفاده شود:
+
+- Provider: OpenAI API
+- API اصلی: Responses API
+- مدل اولیهٔ ارزیابی: `gpt-6-luna`
+- SDK رسمی .NET: package `OpenAI` نسخهٔ `2.14.0`
+- اجرای non-streaming
+- بدون Tool Calling
+- بدون Web Search، File Search، MCP یا سایر ابزارها
+- `store=false`
+- Structured Output با JSON Schema و strict schema enforcement
+- مدل، Provider و API انتخاب‌های همین Feature هستند و نباید به‌عنوان Technical Baseline سراسری ثبت شوند.
+
+در مستندات توضیح بده که `gpt-6-luna` انتخاب اولیه برای این Feature است، نه تضمین عبور از Quality Gate.
+
+اگر Evaluation واقعی آستانه‌های Specification را پاس نکند، انتخاب Model باید براساس نتایج Eval دوباره بررسی شود.
+
+بدون شواهد ارزیابی، fallback خودکار به مدل دیگر ایجاد نکن.
+
+### Structured Output در Responses API
+
+طراحی را با Responses API هماهنگ کن.
+
+Schema نسخه‌دار `content_review_v1` حفظ شود.
+
+برای Structured Output از قابلیت JSON Schema در Responses API استفاده شود.
+
+از JSON Mode ساده یا Prompt-only JSON استفاده نشود.
+
+اگر نام دقیق Property یا API سطح SDK .NET برای Structured Output نیازمند بررسی است، براساس package رسمی `OpenAI 2.14.0` و مستندات معتبر همان نسخه تصمیم را ثبت کن و نام متد یا Property را حدس نزن.
+
+Artifact قرارداد JSON Schema همچنان Source of Truth شکل Wire باشد.
+
+### Reasoning
+
+برای `gpt-6-luna`، reasoning configuration را فقط در صورتی در Plan قطعی کن که برای این Feature دلیل روشن و مستند وجود داشته باشد.
+
+اگر هنوز نیاز به benchmark یا Eval دارد، آن را به‌عنوان تنظیم Feature-level قابل ارزیابی ثبت کن و به Technical Baseline منتقل نکن.
+
+### ثبات مدل
+
+اگر برای `gpt-6-luna` snapshot نسخه‌دار مستقلی در مستندات رسمی در دسترس نیست، snapshot ساختگی یا نام مدل حدسی ایجاد نکن.
+
+مدل واقعی مورد استفاده، تاریخ اجرای Eval، نسخهٔ Prompt و نسخهٔ Schema باید در شواهد Evaluation آینده ثبت شوند.
+
+---
+
+## بخش دوم — حفظ مرز Application و Infra.AI
+
+طراحی فعلی مرز زیر را حفظ کند:
+
+Application:
+
+- مالک هماهنگی Use Case
+- کنترل Permission، Ownership و Eligibility
+- ساخت snapshot محتوای جاری
+- validation مستقل خروجی
+- recheck پیش از تحویل
+- freshness decision
+
+Infra.AI:
+
+- وابسته به SDK رسمی OpenAI
+- ارسال request به Provider
+- اعمال Schema در سطح Provider
+- تشخیص protocol outcome مانند refusal یا incomplete response
+- deserialize کردن candidate
+- تبدیل پاسخ Provider به outcome مستقل از SDK
+
+هیچ Type، Exception یا Client مربوط به OpenAI نباید از مرز `Infra.AI` وارد Application شود.
+
+`Infra.AI` نباید به DataAccess وابسته شود و نباید اختیار تغییر State نرم‌افزار داشته باشد.
+
+---
+
+## بخش سوم — Outcomeها
+
+تفکیک فعلی outcomeها را حفظ و شفاف کن:
+
+### گزارش معتبر
+
+- `completed`
+- `needs_input`
+
+این دو نتیجهٔ معتبر Business-level هستند.
+
+### Refusal
+
+Refusal پاسخ معتبر Review محسوب نمی‌شود و باید به outcome مستقل قابل تشخیص تبدیل شود.
+
+### Failureهای فنی
+
+حداقل این حالت‌ها از نتیجهٔ معتبر جدا باشند:
+
+- timeout
+- provider unavailable / transport failure
+- invalid or incomplete structured output
+- unexpected tool/output form
+
+هیچ Failure فنی نباید با:
+
+- `completed`
+- `needs_input`
+- empty issue list
+
+پنهان شود.
+
+---
+
+## بخش چهارم — Technical Baseline
+
+فایل زیر را به‌روزرسانی کن:
+
+`docs/architecture/technical-baseline.md`
+
+چهار اصل سراسری زیر را به‌عنوان قواعد AI Integration پروژه ثبت کن.
+
+### ۱. قرارداد Structured Output
+
+هر Integration هوش مصنوعی که خروجی آن توسط نرم‌افزار پردازش می‌شود باید یک قرارداد خروجی صریح و نسخه‌دار داشته باشد.
+
+در صورت پشتیبانی Provider، ساختار خروجی باید در سطح Provider با Schema enforcement اعمال شود.
+
+Schema adherence جایگزین Validation مستقل Application نیست.
+
+Application همچنان مسئول اعتبارسنجی معنایی، شواهد، محدودیت‌های کسب‌وکار و تصمیم دربارهٔ قابل استفاده بودن نتیجه است.
+
+Schema Validity نباید معادل Semantic یا Business Validity تلقی شود.
+
+### ۲. تفکیک نتیجهٔ معتبر، Refusal و Failure
+
+Integrationهای AI باید میان این سه دسته تفاوت صریح داشته باشند:
+
+- نتیجهٔ معتبر قابلیت
+- Refusal مدل
+- Failure فنی یا Protocol Failure
+
+Refusal، Timeout، Transport Error یا Invalid Output نباید به‌صورت پاسخ موفق یا گزارش خالی نمایش داده شوند.
+
+Outcomeهای دقیق هر قابلیت می‌توانند متفاوت باشند، اما این تفکیک باید حفظ شود.
+
+### ۳. Data Minimization و Logging
+
+Integrationهای AI فقط داده‌ای را به Provider ارسال کنند که برای Task فعلی ضروری است.
+
+محتوای کاربر، خروجی مدل، Retrieved Data و سایر داده‌های بالقوه حساس نباید به‌صورت پیش‌فرض در Log یا Trace ثبت شوند.
+
+اگر در آینده برای Evaluation، Debugging یا Observability نیاز به ثبت محتوایی وجود داشت، باید هدف، نوع داده، کنترل دسترسی و سیاست نگهداری آن صریحاً تعریف و تأیید شود.
+
+Permission ارسال هر نوع داده به سرویس بیرونی همچنان باید در Specification همان Feature مشخص شود.
+
+این اصل نباید به‌صورت ممنوعیت مطلق Observability یا Evaluation آینده نوشته شود.
+
+### ۴. تفکیک آزمون قطعی از Evaluation مدل
+
+درستی نرم‌افزار و Integration باید با آزمون‌های deterministic قابل اجرا در CI بررسی شود.
+
+این آزمون‌ها نباید به متن دقیق یا رفتار قطعی Model واقعی وابسته باشند.
+
+کیفیت خروجی Model باید در یک مسیر Evaluation جدا، نسخه‌دار و قابل تکرار بررسی شود.
+
+Dataset، Rubric، Model، Prompt، Schema، تنظیمات و Failureها باید در Evaluation ثبت شوند.
+
+Threshold و Dataset هر Feature متعلق به همان Feature هستند و نباید خودکار به تمام قابلیت‌های AI تعمیم داده شوند.
+
+موفقیت CI به‌تنهایی اثبات کیفیت Model نیست و موفقیت Eval نیز جایگزین آزمون Software نمی‌شود.
+
+---
+
+## مواردی که نباید وارد Technical Baseline شوند
+
+این موارد Feature-specific باقی بمانند:
+
+- OpenAI به‌عنوان Provider دائمی کل پروژه
+- Responses API به‌عنوان الزام همهٔ Integrationهای آینده
+- `gpt-6-luna`
+- package یا Client مشخص OpenAI
+- timeout شصت‌ثانیه‌ای
+- `content_review_v1`
+- categoryهای این Feature
+- Prompt این Feature
+- Dataset و thresholdهای `002-ai-content-review`
+- عدم ذخیرهٔ گزارش این Feature
+- Data fields دقیق `title/body`
+- تنظیم Reasoning این Feature
+
+---
+
+## بخش پنجم — AGENTS.md
+
+فایل Root-level `AGENTS.md` را فقط به‌اندازهٔ لازم به‌روزرسانی کن.
+
+قواعد جدید Technical Baseline را داخل AGENTS.md تکرار نکن.
+
+فقط مطمئن شو راهنمای Agent همچنان به:
+
+`docs/architecture/technical-baseline.md`
+
+به‌عنوان مرجع تصمیم‌های فنی سراسری ارجاع می‌دهد.
+
+اگر ارجاع فعلی کافی است، AGENTS.md را بی‌دلیل تغییر نده.
+
+---
+
+## Artifactهای Feature
+
+حداقل فایل‌های زیر را از نظر تصمیم API/Model بازبینی کن:
+
+- `specs/002-ai-content-review/plan.md`
+- `specs/002-ai-content-review/research.md`
+- `specs/002-ai-content-review/contracts/application-ai.md`
+- `specs/002-ai-content-review/contracts/http-api.md`
+- `specs/002-ai-content-review/contracts/model-output.schema.json`
+- `specs/002-ai-content-review/quickstart.md`
+
+فقط فایل‌هایی را تغییر بده که واقعاً تحت تأثیر تصمیم جدید هستند.
+
+`spec.md` را تغییر نده، مگر اینکه تعارض مستقیم با تصمیم فنی جدید کشف شود. در آن صورت ابتدا گزارش بده و تغییر نده.
+
+---
+
+## کنترل سازگاری
+
+پس از اصلاح بررسی کن:
+
+- هیچ ارجاع فعال به `gpt-4.1-mini-2025-04-14` باقی نمانده باشد.
+- هیچ طراحی فعال Feature بر Chat Completions متکی نباشد.
+- Structured Output همچنان strict و Schema-driven باشد.
+- refusal از valid report جدا باقی مانده باشد.
+- Application به OpenAI SDK وابسته نشده باشد.
+- فقط Infra.AI به package رسمی OpenAI وابسته شود.
+- Data Minimization حفظ شده باشد.
+- Timeout و Cancellation فعلی Feature تغییر ناخواسته نکنند.
+- هیچ Tool Calling، MCP، RAG یا Agent وارد این Feature نشده باشد.
+- Technical Baseline شامل فقط چهار اصل سراسری تأییدشده باشد.
+- Provider و Model Feature به Baseline منتقل نشده باشند.
+
+---
+
+## محدودیت این مرحله
+
+- Tasks تولید نکن.
+- `$speckit-tasks` را اجرا نکن.
+- Implementation آغاز نکن.
+- Package نصب نکن.
+- کد C# ایجاد یا تغییر نده.
+- Constitution را تغییر نده.
+- Requirement کسب‌وکاری جدید ایجاد نکن.
+- Evaluation واقعی Model اجرا نکن.
+- Feature بعدی را آغاز نکن.
+
+---
+
+## گزارش پایان
+
+در پایان گزارش کن:
+
+1. چه Artifactهایی تغییر کردند.
+2. طراحی API/Model قبلی دقیقاً چگونه اصلاح شد.
+3. Structured Output در Responses API چگونه مدل شد.
+4. چه چهار اصل وارد Technical Baseline شدند.
+5. چه تصمیم‌هایی عمداً Feature-specific باقی ماندند.
+6. آیا AGENTS.md نیاز به تغییر داشت یا خیر.
+7. آیا ارجاع قدیمی به Chat Completions یا gpt-4.1-mini باقی مانده است.
+8. هر نکتهٔ باز یا محدودیتی که قبل از Tasks باید بررسی شود.
+
+بعد از گزارش متوقف شو و وارد Tasks نشو.

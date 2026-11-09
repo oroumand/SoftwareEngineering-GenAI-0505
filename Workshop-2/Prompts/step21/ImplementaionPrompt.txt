@@ -1,0 +1,187 @@
+`$speckit-implement`
+
+تمام بخش‌های کدنویسی و آماده‌سازی Feature فعال `002-ai-content-review` را براساس `tasks.md`، Specification، Plan، Research، قراردادها، Constitution و Technical Baseline پیاده‌سازی کن.
+
+در این مرحله قصد داریم کدنویسی Feature را کامل کنیم، اما اجرای تست‌ها، Evaluation واقعی و تأیید نهایی عملکرد عمداً به کارگاه بعدی موکول شده است.
+
+## دامنهٔ اجرا
+
+تمام Taskهای قابل پیاده‌سازی را انجام بده، شامل:
+
+- ایجاد و اتصال پروژه `Infra.AI`
+- قراردادهای Application
+- Reader و projectionهای لازم
+- Deadline و Cancellation infrastructure
+- Content Review Service
+- Validator مستقل
+- Prompt نسخه‌دار
+- Strict output parser
+- OpenAI Responses API adapter
+- Structured Output با Schema موجود
+- تفکیک completed / needs_input / refusal / failure
+- HTTP endpoint و DTOها
+- DI و Configuration
+- OpenAPI metadata
+- Data Minimization و حفاظت Logging
+- Freshness و recheck
+- مدیریت concurrency و timeout
+- راهنمای Quickstart و تنظیمات عملیاتی
+- تمام Unit/Integration test code
+- Fake gateway و test fixtures
+- Corpus ارزیابی
+- Evaluation protocol
+- Provider smoke-test code
+- Quality evaluation runner code
+
+تست‌ها و Evaluation infrastructure باید نوشته و آمادهٔ اجرا باشند؛ هدف این است که جلسهٔ بعد بتوانیم مستقیماً وارد Test، Debug، Evaluation و Acceptance شویم.
+
+## Taskهایی که در این مرحله عمداً اجرا و تکمیل نمی‌شوند
+
+Taskهای زیر را انجام‌شده علامت نزن:
+
+- `T025`
+- `T029`
+- `T040`
+- `T045`
+- `T046`
+- `T047`
+- `T049`
+- `T050`
+
+علت:
+
+این Taskها به اجرای واقعی تست، Provider، Quality Evaluation، Human Evaluation یا ثبت شواهد نهایی Acceptance وابسته‌اند و قرار است در مرحلهٔ بعد به‌صورت آموزشی اجرا شوند.
+
+فایل‌ها و زیرساخت لازم برای اجرای آن‌ها را اکنون آماده کن، اما نتیجهٔ ساختگی ثبت نکن.
+
+## دربارهٔ تست‌ها
+
+Taskهایی که می‌گویند Test Code ایجاد شود باید اکنون پیاده‌سازی شوند.
+
+صرفاً به این دلیل که اجرای تست به جلسهٔ بعد موکول شده، نوشتن Test Code را حذف نکن.
+
+بنابراین تست‌های مربوط به:
+
+- Application
+- Validator
+- Transport
+- Protocol
+- HTTP
+- needs_input
+- Non-Mutation
+- Concurrency
+- Timeout
+- Privacy
+- Configuration
+- OpenAPI
+- Provider opt-in
+- Quality Eval
+
+باید اکنون وجود داشته باشند.
+
+ولی اجرای Suite و ثبت Pass/Fail نهایی جزو این مرحله نیست.
+
+## Build
+
+در صورت نیاز برای رفع خطاهای compilation یا dependency می‌توانی `restore` و `build` اجرا کنی.
+
+این کار فقط Development Check محسوب می‌شود.
+
+اجرای build را جایگزین Validation، Test یا Acceptance معرفی نکن و به‌دلیل اجرای build، `T049` را تکمیل‌شده علامت نزن.
+
+## OpenAI
+
+طراحی تأییدشده را رعایت کن:
+
+- OpenAI Responses API
+- مدل اولیه `gpt-6-luna`
+- package رسمی `OpenAI 2.14.0`
+- non-streaming
+- `store=false`
+- بدون Tool Calling
+- بدون MCP
+- بدون Web Search
+- بدون File Search
+- بدون RAG
+- بدون Agent
+- بدون fallback خودکار
+
+Structured Output باید با Schema نسخه‌دار `content_review_v1` انجام شود.
+
+Artifact موجود:
+
+`specs/002-ai-content-review/contracts/model-output.schema.json`
+
+Source of Truth قرارداد Wire باقی بماند.
+
+JSON Mode ساده یا Prompt-only JSON استفاده نشود.
+
+## مرز مسئولیت‌ها
+
+Application مسئول:
+
+- Authorization
+- Ownership
+- Eligibility
+- Snapshot
+- Validation
+- Freshness
+- Recheck
+- Business decision
+
+باشد.
+
+`Infra.AI` فقط مسئول:
+
+- SDK
+- Prompt
+- Provider request
+- Schema enforcement
+- Protocol outcome
+- parsing candidate
+
+باشد.
+
+OpenAI SDK type یا exception نباید وارد Application شود.
+
+AI نباید:
+
+- Post را تغییر دهد
+- Permission تصمیم بگیرد
+- Post را Submit کند
+- Approve کند
+- Publish کند
+- به DataAccess وابسته شود
+
+## Task status
+
+هر Taskی که واقعاً پیاده‌سازی آن تمام شد در `tasks.md` به `[X]` تغییر کند.
+
+هشت Task تعویق‌داده‌شده باید `[ ]` باقی بمانند.
+
+اگر Task دیگری بدون اجرای تست/Eval قابل تکمیل نیست، نتیجهٔ ساختگی ایجاد نکن؛ آن را باز نگه دار و در گزارش نهایی دلیلش را مشخص کن.
+
+## محدودیت مرحله
+
+Feature بعدی را شروع نکن.
+
+Tool Calling، MCP، RAG، Qdrant و Agent وارد این Feature نشوند.
+
+Constitution و تصمیم‌های تثبیت‌شدهٔ Technical Baseline را تغییر نده، مگر اینکه یک تعارض واقعی کشف شود؛ در آن صورت خودکار اصلاح نکن و فقط گزارش بده.
+
+## گزارش نهایی
+
+در پایان گزارش کن:
+
+1. چند Task تکمیل شدند.
+2. چه Taskهایی باز ماندند و چرا.
+3. چه پروژه‌ها و فایل‌های اصلی اضافه یا تغییر کردند.
+4. معماری نهایی مسیر Content Review چگونه است.
+5. Structured Output چگونه پیاده‌سازی شد.
+6. مرز Application و Infra.AI چگونه حفظ شد.
+7. چه Test/Eval infrastructureای برای جلسهٔ بعد آماده شده است.
+8. آیا Build انجام شد و نتیجه چه بود.
+9. چه محدودیت یا ریسک بازی باقی مانده است.
+10. تأکید کن که Validation و Acceptance هنوز انجام نشده‌اند.
+
+پس از پایان Implementation متوقف شو و هیچ Test، Evaluation یا Feature بعدی را آغاز نکن.

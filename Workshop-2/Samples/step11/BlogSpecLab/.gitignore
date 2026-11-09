@@ -1,0 +1,34 @@
+# خروجی ساخت و ابزارهای محلی
+bin/
+obj/
+packages/
+TestResults/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# دادهٔ محلی SQLite و فایل‌های جانبی
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# تنظیمات محرمانهٔ محلی و گواهی‌ها
+.env
+.env.*
+secrets/
+secrets.json
+appsettings.Local.json
+appsettings.*.Local.json
+*.pfx
+*.p12
+*.key
